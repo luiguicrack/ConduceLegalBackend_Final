@@ -1,0 +1,47 @@
+# Node.js
+node_modules/
+.env
+*.log
+.DS_Store
+
+# Visual Studio
+.vs/
+*.vscode
+*.user
+*.suo
+*.cache
+*.dbmdl
+*.bak
+*.log
+*.ncb
+*.opendb
+*.sdf
+*.tlog
+
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+[Tt]emp/
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+
+# Backup & generated files
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.ipch
+*.res
+*.tmp
+*.exe
+*.dll
+*.app
+*.cachefile
