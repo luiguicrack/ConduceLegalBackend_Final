@@ -1,5 +1,11 @@
 import express from 'express';
-import normasController from '../controllers/normasController.js';
+import {
+  createNorma,
+  getNormas,
+  getNormaById,
+  updateNorma,
+  deleteNorma
+} from '../controllers/normasController.js';
 
 const router = express.Router();
 
@@ -18,17 +24,15 @@ const router = express.Router();
  *           type: string
  *         id_categoria:
  *           type: integer
- *         id_estado:
+ *         id_Cnorma:
  *           type: integer
- *         descriptcion:
+ *         descripcion:
  *           type: string
  *         fuente:
  *           type: string
  *         fecha_emicion:
  *           type: string
  *           format: date
- *         id_Cnorma:
- *           type: integer
  *         fecha_creacion:
  *           type: string
  *           format: date-time
@@ -39,23 +43,23 @@ const router = express.Router();
  * /api/gestion/normas:
  *   get:
  *     summary: Obtener listado de normas
- *     tags: [Gestión - Normas]
+ *     tags: [GestiÃ³n - Normas]
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *         description: Página actual
+ *         description: PÃ¡gina actual
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: Límite de registros por página
+ *         description: LÃ­mite de registros por pÃ¡gina
  *       - in: query
  *         name: categoria
  *         schema:
  *           type: integer
- *         description: Filtrar por categoría
+ *         description: Filtrar por categorÃ­a
  *       - in: query
  *         name: estado
  *         schema:
@@ -65,65 +69,19 @@ const router = express.Router();
  *         name: search
  *         schema:
  *           type: string
- *         description: Término de búsqueda en título o descripción
+ *         description: TÃ©rmino de bÃºsqueda en tÃ­tulo o descripciÃ³n
  *     responses:
  *       200:
  *         description: Lista de normas obtenida exitosamente
  */
-router.get('/normas', normasController.getNormas);
-
-/**
- * @swagger
- * /api/gestion/normas/categorias:
- *   get:
- *     summary: Obtener categorías disponibles
- *     tags: [Gestión - Normas]
- *     responses:
- *       200:
- *         description: Lista de categorías
- */
-router.get('/normas/categorias', normasController.getCategorias);
-
-/**
- * @swagger
- * /api/gestion/normas/estados:
- *   get:
- *     summary: Obtener estados disponibles
- *     tags: [Gestión - Normas]
- *     responses:
- *       200:
- *         description: Lista de estados
- */
-router.get('/normas/estados', normasController.getEstados);
-
-/**
- * @swagger
- * /api/gestion/normas/verificar-numero:
- *   get:
- *     summary: Verificar si un número de norma está disponible
- *     tags: [Gestión - Normas]
- *     parameters:
- *       - in: query
- *         name: numero_norma
- *         required: true
- *         schema:
- *           type: integer
- *       - in: query
- *         name: exclude_id
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Resultado de la verificación
- */
-router.get('/normas/verificar-numero', normasController.verificarNumeroNorma);
+router.get('/normas', getNormas);
 
 /**
  * @swagger
  * /api/gestion/normas/{id}:
  *   get:
  *     summary: Obtener norma por ID
- *     tags: [Gestión - Normas]
+ *     tags: [GestiÃ³n - Normas]
  *     parameters:
  *       - in: path
  *         name: id
@@ -136,14 +94,14 @@ router.get('/normas/verificar-numero', normasController.verificarNumeroNorma);
  *       404:
  *         description: Norma no encontrada
  */
-router.get('/normas/:id', normasController.getNormaById);
+router.get('/normas/:id', getNormaById);
 
 /**
  * @swagger
  * /api/gestion/normas:
  *   post:
  *     summary: Crear nueva norma
- *     tags: [Gestión - Normas]
+ *     tags: [GestiÃ³n - Normas]
  *     requestBody:
  *       required: true
  *       content:
@@ -154,8 +112,8 @@ router.get('/normas/:id', normasController.getNormaById);
  *               - numero_norma
  *               - titulo_norma
  *               - id_categoria
- *               - id_estado
- *               - descriptcion
+ *               - id_Cnorma
+ *               - descripcion
  *             properties:
  *               numero_norma:
  *                 type: integer
@@ -166,36 +124,33 @@ router.get('/normas/:id', normasController.getNormaById);
  *               id_categoria:
  *                 type: integer
  *                 example: 1
- *               id_estado:
+ *               id_Cnorma:
  *                 type: integer
  *                 example: 1
- *               descriptcion:
+ *               descripcion:
  *                 type: string
- *                 example: "Descripción detallada de la nueva normativa..."
+ *                 example: "DescripciÃ³n detallada de la nueva normativa..."
  *               fuente:
  *                 type: string
- *                 example: "Congreso de la República"
+ *                 example: "Congreso de la RepÃºblica"
  *               fecha_emicion:
  *                 type: string
  *                 format: date
  *                 example: "2024-01-15"
- *               id_Cnorma:
- *                 type: integer
- *                 example: 1
  *     responses:
  *       201:
  *         description: Norma creada exitosamente
  *       400:
- *         description: Datos inválidos o número de norma duplicado
+ *         description: Datos invÃ¡lidos o nÃºmero de norma duplicado
  */
-router.post('/normas', normasController.createNorma);
+router.post('/normas', createNorma);
 
 /**
  * @swagger
  * /api/gestion/normas/{id}:
  *   put:
  *     summary: Actualizar norma existente
- *     tags: [Gestión - Normas]
+ *     tags: [GestiÃ³n - Normas]
  *     parameters:
  *       - in: path
  *         name: id
@@ -214,14 +169,14 @@ router.post('/normas', normasController.createNorma);
  *       404:
  *         description: Norma no encontrada
  */
-router.put('/normas/:id', normasController.updateNorma);
+router.put('/normas/:id', updateNorma);
 
 /**
  * @swagger
  * /api/gestion/normas/{id}:
  *   delete:
  *     summary: Eliminar norma
- *     tags: [Gestión - Normas]
+ *     tags: [GestiÃ³n - Normas]
  *     parameters:
  *       - in: path
  *         name: id
@@ -234,6 +189,6 @@ router.put('/normas/:id', normasController.updateNorma);
  *       404:
  *         description: Norma no encontrada
  */
-router.delete('/normas/:id', normasController.deleteNorma);
+router.delete('/normas/:id', deleteNorma);
 
 export default router;
