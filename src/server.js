@@ -3,12 +3,13 @@ import cors from 'cors';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import dotenv from 'dotenv';
-
 import contenidoRoutes from './routes/contenido.routes.js';
 import consejoRoutes from './routes/consejo.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import reportRoutes from "./routes/report.routes.js";
 import noticiaRoutes from './routes/noticia.routes.js';
+import normasRoutes from './routes/normas.routes.js';
+import faqRoutes from './routes/faq.routes.js';
 
 
 
@@ -379,6 +380,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/consejos', consejoRoutes);
 app.use('/api/noticias', noticiaRoutes);
 app.use("/api/report", reportRoutes);
+app.use('/api/gestion', normasRoutes);
+app.use('/api/faq', faqRoutes);
 
 // Manejar rutas no encontradas
 app.use('*', (req, res) => {
