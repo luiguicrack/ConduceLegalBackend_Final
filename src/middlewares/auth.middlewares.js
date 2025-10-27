@@ -6,7 +6,6 @@ import jwtConfig from '../utilities/jwt.config.js';
  */
 const verificarToken = (req, res, next) => {
     try {
-        // El token normalmente viene en el encabezado: Authorization: Bearer <token>
         const authHeader = req.headers['authorization'];
 
         if (!authHeader) {
@@ -16,7 +15,7 @@ const verificarToken = (req, res, next) => {
             });
         }
 
-        const token = authHeader.split(' ')[1]; // Extrae el token después de "Bearer"
+        const token = authHeader.split(' ')[1];
 
         if (!token) {
             return res.status(403).json({
@@ -25,7 +24,6 @@ const verificarToken = (req, res, next) => {
             });
         }
 
-        // Verificar el token
         jwt.verify(token, jwtConfig.secret, (error, decoded) => {
             if (error) {
                 return res.status(401).json({
@@ -34,7 +32,6 @@ const verificarToken = (req, res, next) => {
                 });
             }
 
-            // Guardar la información del usuario en la solicitud
             req.usuario = decoded;
             next();
         });
@@ -48,7 +45,9 @@ const verificarToken = (req, res, next) => {
 };
 
 /**
- * Middleware adicional para verificar si el usuario es administrador
+ * Middleware para verificar si el usuario tiene rol permitido
+ * Roles permitidos: 1 (admin), 3 y 4
+ * Rol denegado: 2 (usuario)
  */
 const verificarAdmin = (req, res, next) => {
     try {
@@ -59,15 +58,17 @@ const verificarAdmin = (req, res, next) => {
             });
         }
 
-        // Verificar si el rol del usuario es de administrador (id_rol = 1)
-        if (req.usuario.id_rol !== 1) {
+        // Roles permitidos
+        const rolesPermitidos = [1, 3, 4];
+
+        if (!rolesPermitidos.includes(req.usuario.id_rol)) {
             return res.status(403).json({
                 success: false,
-                message: 'Acceso denegado: se requiere rol de administrador'
+                message: 'Acceso denegado: se requiere rol autorizado (1, 3 o 4)'
             });
         }
 
-        next(); // El usuario es admin, puede continuar
+        next(); // El rol está permitido, puede continuar
     } catch (error) {
         res.status(500).json({
             success: false,
