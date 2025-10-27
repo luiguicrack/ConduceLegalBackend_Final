@@ -10,6 +10,10 @@ import reportRoutes from "./routes/report.routes.js";
 import noticiaRoutes from './routes/noticia.routes.js';
 import normasRoutes from './routes/normas.routes.js';
 import faqRoutes from './routes/faq.routes.js';
+import categoriaRoutes from './routes/categoria.routes.js';
+import estadoRoutes from './routes/estado.routes.js';
+import categoriaNormaRoutes from "./routes/categoriaNorma.routes.js";
+
 
 
 
@@ -382,15 +386,20 @@ app.use('/api/noticias', noticiaRoutes);
 app.use("/api/report", reportRoutes);
 app.use('/api/gestion', normasRoutes);
 app.use('/api/faq', faqRoutes);
+app.use('/api/estados', estadoRoutes);
+app.use('/api/categorias', categoriaRoutes);
+app.use("/api/categoria_norma", categoriaNormaRoutes);
+
+
 
 // Manejar rutas no encontradas
-app.use('*', (req, res) => {
+app.use('*', (req, res) => {    
     res.status(404).json({
         error: 'Ruta no encontrada',
         message: `La ruta ${req.originalUrl} no existe`,
         available_endpoints: [
             'GET /',
-            'GET /api/health',
+            'GET /api/health',      
             'POST /api/auth/registro',
             'POST /api/auth/login',
             'POST /api/auth/logout',

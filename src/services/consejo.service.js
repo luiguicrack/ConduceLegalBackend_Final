@@ -84,7 +84,7 @@ class ConsejoService {
             throw new Error(`Error al actualizar el consejo: ${error.message}`);
         }
     }
-
+        
     async eliminar(id_consejo) {
         try {
             const [result] = await db.execute(`DELETE FROM consejo WHERE id_consejo = ?`, [id_consejo]);
