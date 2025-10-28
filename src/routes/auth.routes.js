@@ -291,8 +291,7 @@ router.get("/restablecer/:token", async (req, res) => {
     <body>
       <div class="container">
         <h2>🔒 Restablece tu contraseña</h2>
-        <p>Tu enlace es válido. Usa el siguiente token para confirmar el cambio:</p>
-        <div class="token-box">${token}</div>
+        <p>Tu enlace es válido.</p>
         <form id="resetForm">
           <input type="password" id="newPassword" placeholder="Nueva contraseña" required />
           <button type="submit">Actualizar contraseña</button>

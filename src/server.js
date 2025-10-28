@@ -36,7 +36,8 @@ const swaggerOptions = {
                 'API para sistema de educación vial - Documentación Swagger.\n\n' +
                 '**Documentación anexa:**\n' +
                 '- [Trello Conduce Legal](https://trello.com/b/40EFVUGw/conduce-legal)\n' +
-                '- [Google Sheets - Product Backlog](https://docs.google.com/spreadsheets/d/1SyCIVQKDo7TFxHmS_SofwogTCbBFbPjB/edit?usp=sharing&ouid=101887930250134460722&rtpof=true&sd=true)',
+                '- [Google Sheets - Product Backlog](https://docs.google.com/spreadsheets/d/1SyCIVQKDo7TFxHmS_SofwogTCbBFbPjB/edit?usp=sharing&ouid=101887930250134460722&rtpof=true&sd=true)\n' +
+                '- [Google Drive - Documentación](https://drive.google.com/drive/folders/15zcsjuSAXnhkae0LupokjyE-MoPDwxOT)\n',
             contact: {
                 name: 'Equipo Conduce Legal',
                 email: 'equipo@conducelegal.com'
