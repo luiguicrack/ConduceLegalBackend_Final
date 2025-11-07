@@ -5,95 +5,10 @@ const router = express.Router();
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     CategoriaFAQ:
- *       type: object
- *       properties:
- *         id_categoria:
- *           type: integer
- *           example: 1
- *         nombre_categoria:
- *           type: string
- *           example: "Uso del Sistema"
- *         descripcion:
- *           type: string
- *           example: "Preguntas sobre cómo utilizar la plataforma"
- *         icono:
- *           type: string
- *           example: "💻"
- *         orden:
- *           type: integer
- *           example: 1
- *         preguntas:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/PreguntaFAQ'
- *     PreguntaFAQ:
- *       type: object
- *       properties:
- *         id_pregunta:
- *           type: integer
- *           example: 1
- *         pregunta:
- *           type: string
- *           example: "¿Cómo puedo registrarme en el sistema?"
- *         respuesta:
- *           type: string
- *           example: "Para registrarte, haz clic en el botón Registrarse..."
- *         fecha_creacion:
- *           type: string
- *           format: date-time
- *     BusquedaResult:
- *       type: object
- *       properties:
- *         id_pregunta:
- *           type: integer
- *         pregunta:
- *           type: string
- *         respuesta:
- *           type: string
- *         id_categoria:
- *           type: integer
- */
-
-/**
- * @swagger
- * /api/faq/categorias:
- *   get:
- *     summary: Obtener todas las categorías de FAQ con sus preguntas
- *     description: Retorna un listado organizado de categorías con sus respectivas preguntas y respuestas
- *     tags: [Preguntas Frecuentes]
- *     responses:
- *       200:
- *         description: Lista de categorías con preguntas organizadas
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/CategoriaFAQ'
- *                 message:
- *                   type: string
- *                 metadata:
- *                   type: object
- *       500:
- *         description: Error interno del servidor
- */
-router.get('/categorias', FAQController.getCategoriasConPreguntas);
-
-/**
- * @swagger
  * /api/faq/preguntas:
  *   get:
  *     summary: Obtener todas las preguntas frecuentes
- *     description: Retorna todas las preguntas en formato plano para búsquedas
+ *     description: Retorna todas las preguntas de la base de datos
  *     tags: [Preguntas Frecuentes]
  *     responses:
  *       200:
@@ -108,9 +23,16 @@ router.get('/categorias', FAQController.getCategoriasConPreguntas);
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/PreguntaFAQ'
- *       500:
- *         description: Error interno del servidor
+ *                     type: object
+ *                     properties:
+ *                       id_pregunta:
+ *                         type: integer
+ *                       pregunta:
+ *                         type: string
+ *                       respuesta:
+ *                         type: string
+ *                       fecha_creacion:
+ *                         type: string
  */
 router.get('/preguntas', FAQController.getAllPreguntas);
 
@@ -128,25 +50,6 @@ router.get('/preguntas', FAQController.getAllPreguntas);
  *         description: Término de búsqueda (mínimo 2 caracteres)
  *         schema:
  *           type: string
- *           example: "registro"
- *     responses:
- *       200:
- *         description: Resultados de búsqueda
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/BusquedaResult'
- *       400:
- *         description: Término de búsqueda inválido
- *       500:
- *         description: Error interno del servidor
  */
 router.get('/buscar', FAQController.buscarPreguntas);
 
@@ -163,14 +66,67 @@ router.get('/buscar', FAQController.buscarPreguntas);
  *         description: ID de la pregunta
  *         schema:
  *           type: integer
- *     responses:
- *       200:
- *         description: Pregunta encontrada
- *       404:
- *         description: Pregunta no encontrada
- *       500:
- *         description: Error interno del servidor
  */
 router.get('/pregunta/:id', FAQController.getPreguntaById);
 
+/**
+ * @swagger
+ * /api/faq/recientes:
+ *   get:
+ *     summary: Obtener preguntas más recientes
+ *     tags: [Preguntas Frecuentes]
+ */
+router.get('/recientes', FAQController.getPreguntasRecientes);
+
 export default router;
+
+/**
+ * @swagger
+ * /api/faq/preguntas:
+ *   post:
+ *     summary: Crear una nueva pregunta
+ *     tags: [Preguntas Frecuentes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - titulo_pregunta
+ *               - respuesta
+ *             properties:
+ *               titulo_pregunta:
+ *                 type: string
+ *                 example: "¿Cómo resetear mi contraseña?"
+ *               respuesta:
+ *                 type: string
+ *                 example: "Para resetear tu contraseña ve a 'Olvidé mi contraseña'..."
+ *               id_usuario:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Pregunta creada exitosamente
+ *       400:
+ *         description: Datos inválidos
+ */
+router.post('/preguntas', FAQController.crearPregunta);
+
+/**
+ * @swagger
+ * /api/faq/usuario/{id_usuario}/preguntas:
+ *   get:
+ *     summary: Obtener preguntas de un usuario específico
+ *     tags: [Preguntas Frecuentes]
+ *     parameters:
+ *       - in: path
+ *         name: id_usuario
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Preguntas del usuario
+ */
+router.get('/usuario/:id_usuario/preguntas', FAQController.getMisPreguntas);

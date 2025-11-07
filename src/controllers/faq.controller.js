@@ -1,63 +1,13 @@
 ﻿import FAQModel from '../services/faq.service.js';
 
 class FAQController {
-    // Obtener todas las categorías con sus preguntas
-    static async getCategoriasConPreguntas(req, res) {
-        try {
-            console.log('📋 [FAQ] Solicitando categorías con preguntas...');
-
-            // Inicializar datos si es necesario
-            await FAQModel.inicializarDatosEjemplo();
-
-            const categorias = await FAQModel.getCategorias();
-
-            // Para cada categoría, obtener sus preguntas
-            const categoriasConPreguntas = await Promise.all(
-                categorias.map(async (categoria) => {
-                    const preguntas = await FAQModel.getPreguntasPorCategoria(categoria.id_categoria);
-                    return {
-                        id_categoria: categoria.id_categoria,
-                        nombre_categoria: categoria.nombre_categoria,
-                        descripcion: categoria.descripcion,
-                        icono: categoria.icono,
-                        orden: categoria.orden,
-                        preguntas: preguntas.map(p => ({
-                            id_pregunta: p.id_pregunta,
-                            pregunta: p.pregunta,
-                            respuesta: p.respuesta,
-                            fecha_creacion: p.fecha_creacion
-                        }))
-                    };
-                })
-            );
-
-            console.log(`✅ [FAQ] Enviadas ${categoriasConPreguntas.length} categorías con preguntas`);
-
-            res.json({
-                success: true,
-                data: categoriasConPreguntas,
-                message: 'Categorías y preguntas obtenidas exitosamente',
-                metadata: {
-                    total_categorias: categoriasConPreguntas.length,
-                    total_preguntas: categoriasConPreguntas.reduce((acc, cat) => acc + cat.preguntas.length, 0),
-                    timestamp: new Date().toISOString()
-                }
-            });
-
-        } catch (error) {
-            console.error('❌ [FAQ] Error en getCategoriasConPreguntas:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error interno del servidor al obtener las preguntas frecuentes',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined
-            });
-        }
-    }
-
-    // Obtener todas las preguntas (formato plano para búsqueda)
+    // Obtener todas las preguntas
     static async getAllPreguntas(req, res) {
         try {
             console.log('🔍 [FAQ] Solicitando todas las preguntas...');
+
+            // Verificar conexión primero
+            await FAQModel.verificarConexion();
 
             const preguntas = await FAQModel.getAllPreguntas();
 
@@ -66,7 +16,7 @@ class FAQController {
             res.json({
                 success: true,
                 data: preguntas,
-                message: 'Todas las preguntas obtenidas exitosamente',
+                message: 'Preguntas obtenidas exitosamente',
                 metadata: {
                     total_preguntas: preguntas.length,
                     timestamp: new Date().toISOString()
@@ -127,25 +77,18 @@ class FAQController {
     static async getPreguntaById(req, res) {
         try {
             const { id } = req.params;
-
             console.log(`📖 [FAQ] Solicitando pregunta ID: ${id}`);
 
-            const [preguntas] = await db.execute(
-                'SELECT id_pregunta, titulo_pregunta as pregunta, respuesta, id_categoria, fecha_creacion FROM preguntas WHERE id_pregunta = ?',
-                [id]
-            );
+            const pregunta = await FAQModel.getPreguntaById(id);
 
-            if (preguntas.length === 0) {
+            if (!pregunta) {
                 return res.status(404).json({
                     success: false,
                     message: 'Pregunta no encontrada'
                 });
             }
 
-            const pregunta = preguntas[0];
-
             console.log(`✅ [FAQ] Pregunta ${id} enviada`);
-
             res.json({
                 success: true,
                 data: pregunta,
@@ -157,6 +100,110 @@ class FAQController {
             res.status(500).json({
                 success: false,
                 message: 'Error interno del servidor al obtener la pregunta'
+            });
+        }
+    }
+
+    // Obtener preguntas recientes
+    static async getPreguntasRecientes(req, res) {
+        try {
+            console.log('🆕 [FAQ] Solicitando preguntas recientes...');
+
+            const preguntas = await FAQModel.getPreguntasRecientes();
+
+            console.log(`✅ [FAQ] Enviadas ${preguntas.length} preguntas recientes`);
+
+            res.json({
+                success: true,
+                data: preguntas,
+                message: 'Preguntas recientes obtenidas exitosamente',
+                metadata: {
+                    total_preguntas: preguntas.length,
+                    timestamp: new Date().toISOString()
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ [FAQ] Error en getPreguntasRecientes:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al obtener preguntas recientes'
+            });
+        }
+    }
+
+    // Crear nueva pregunta
+    static async crearPregunta(req, res) {
+        try {
+            const { titulo_pregunta, respuesta, id_usuario } = req.body;
+
+            // Validaciones básicas
+            if (!titulo_pregunta || !respuesta) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El título y la respuesta son obligatorios'
+                });
+            }
+
+            if (titulo_pregunta.length < 5) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El título debe tener al menos 5 caracteres'
+                });
+            }
+
+            console.log(`📝 [FAQ] Creando nueva pregunta: "${titulo_pregunta}"`);
+
+            const nuevaPregunta = await FAQModel.crearPregunta({
+                titulo_pregunta: titulo_pregunta.trim(),
+                respuesta: respuesta.trim(),
+                id_usuario: id_usuario || 1 // Por defecto usuario 1
+            });
+
+            console.log(`✅ [FAQ] Pregunta creada con ID: ${nuevaPregunta.id_pregunta}`);
+
+            res.status(201).json({
+                success: true,
+                data: nuevaPregunta,
+                message: 'Pregunta creada exitosamente'
+            });
+
+        } catch (error) {
+            console.error('❌ [FAQ] Error al crear pregunta:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al crear la pregunta'
+            });
+        }
+    }
+
+    // Obtener preguntas del usuario
+    static async getMisPreguntas(req, res) {
+        try {
+            const { id_usuario } = req.params;
+        
+            console.log(`👤 [FAQ] Solicitando preguntas del usuario: ${id_usuario}`);
+
+            const preguntas = await FAQModel.getPreguntasPorUsuario(id_usuario);
+
+            console.log(`✅ [FAQ] Enviadas ${preguntas.length} preguntas del usuario ${id_usuario}`);
+
+            res.json({
+                success: true,
+                data: preguntas,
+                message: 'Preguntas del usuario obtenidas exitosamente',
+                metadata: {
+                    total_preguntas: preguntas.length,
+                    id_usuario: parseInt(id_usuario),
+                    timestamp: new Date().toISOString()
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ [FAQ] Error al obtener preguntas del usuario:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al obtener las preguntas del usuario'
             });
         }
     }
