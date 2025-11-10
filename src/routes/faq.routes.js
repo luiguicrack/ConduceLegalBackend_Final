@@ -78,8 +78,6 @@ router.get('/pregunta/:id', FAQController.getPreguntaById);
  */
 router.get('/recientes', FAQController.getPreguntasRecientes);
 
-export default router;
-
 /**
  * @swagger
  * /api/faq/preguntas:
@@ -105,6 +103,7 @@ export default router;
  *               id_usuario:
  *                 type: integer
  *                 example: 1
+ *                 description: Opcional, si no se pasa se inserta NULL
  *     responses:
  *       201:
  *         description: Pregunta creada exitosamente
@@ -112,6 +111,28 @@ export default router;
  *         description: Datos inválidos
  */
 router.post('/preguntas', FAQController.crearPregunta);
+
+/**
+ * @swagger
+ * /api/faq/preguntas/{id}:
+ *   delete:
+ *     summary: Eliminar una pregunta frecuente por su ID
+ *     description: Permite eliminar una pregunta existente mediante su identificador único
+ *     tags: [Preguntas Frecuentes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la pregunta a eliminar
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Pregunta eliminada exitosamente
+ *       404:
+ *         description: Pregunta no encontrada
+ */
+router.delete('/preguntas/:id', FAQController.eliminarPregunta);
 
 /**
  * @swagger
@@ -130,3 +151,5 @@ router.post('/preguntas', FAQController.crearPregunta);
  *         description: Preguntas del usuario
  */
 router.get('/usuario/:id_usuario/preguntas', FAQController.getMisPreguntas);
+
+export default router;

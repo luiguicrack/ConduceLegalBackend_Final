@@ -1,7 +1,7 @@
 ﻿import db from '../config/database.config.js';
 
 class FAQModel {
-    // Verificar conexión a la base de datos
+    // ✅ Verificar conexión a la base de datos
     static async verificarConexion() {
         try {
             const [result] = await db.execute('SELECT COUNT(*) as total FROM preguntas');
@@ -13,13 +13,13 @@ class FAQModel {
         }
     }
 
-    // Obtener todas las preguntas
+    // ✅ Obtener todas las preguntas
     static async getAllPreguntas() {
         try {
             const [preguntas] = await db.execute(
                 `SELECT 
                     id_pregunta, 
-                    titulo_pregunta as pregunta, 
+                    titulo_pregunta AS pregunta, 
                     respuesta, 
                     fecha_creacion 
                  FROM preguntas 
@@ -32,14 +32,14 @@ class FAQModel {
         }
     }
 
-    // Buscar preguntas por término
+    // ✅ Buscar preguntas por término
     static async buscarPreguntas(termino) {
         try {
             const terminoBusqueda = `%${termino}%`;
             const [resultados] = await db.execute(
                 `SELECT 
                     id_pregunta, 
-                    titulo_pregunta as pregunta, 
+                    titulo_pregunta AS pregunta, 
                     respuesta, 
                     fecha_creacion
                  FROM preguntas 
@@ -59,13 +59,13 @@ class FAQModel {
         }
     }
 
-    // Obtener pregunta específica por ID
+    // ✅ Obtener pregunta por ID
     static async getPreguntaById(idPregunta) {
         try {
             const [preguntas] = await db.execute(
                 `SELECT 
                     id_pregunta, 
-                    titulo_pregunta as pregunta, 
+                    titulo_pregunta AS pregunta, 
                     respuesta, 
                     fecha_creacion 
                  FROM preguntas 
@@ -79,13 +79,13 @@ class FAQModel {
         }
     }
 
-    // Obtener preguntas más recientes
+    // ✅ Obtener preguntas recientes
     static async getPreguntasRecientes(limite = 5) {
         try {
             const [preguntas] = await db.execute(
                 `SELECT 
                     id_pregunta, 
-                    titulo_pregunta as pregunta, 
+                    titulo_pregunta AS pregunta, 
                     respuesta, 
                     fecha_creacion 
                  FROM preguntas 
@@ -100,28 +100,27 @@ class FAQModel {
         }
     }
 
-    // Crear nueva pregunta
+    // ✅ Crear nueva pregunta (sin necesidad de id_usuario)
     static async crearPregunta(preguntaData) {
         try {
-            const { titulo_pregunta, respuesta, id_usuario = 1, id_categoria = 1 } = preguntaData;
-        
-            // Validar que la categoría exista (1=carro, 2=moto)
+            const { titulo_pregunta, respuesta, id_usuario, id_categoria = 1 } = preguntaData;
+
             const categoriaValida = id_categoria === 1 || id_categoria === 2;
             if (!categoriaValida) {
                 throw new Error('La categoría debe ser 1 (carro) o 2 (moto)');
             }
-        
+
             const [result] = await db.execute(
                 `INSERT INTO preguntas (titulo_pregunta, respuesta, id_usuario, id_categoria, fecha_creacion) 
                  VALUES (?, ?, ?, ?, NOW())`,
-                [titulo_pregunta, respuesta, id_usuario, id_categoria]
+                [titulo_pregunta, respuesta, id_usuario || null, id_categoria]
             );
-        
+
             return {
                 id_pregunta: result.insertId,
                 titulo_pregunta,
                 respuesta,
-                id_usuario,
+                id_usuario: id_usuario || null,
                 id_categoria,
                 fecha_creacion: new Date()
             };
@@ -131,11 +130,15 @@ class FAQModel {
         }
     }
 
-    // Obtener preguntas por usuario
+    // ✅ Obtener preguntas por usuario
     static async getPreguntasPorUsuario(idUsuario) {
         try {
             const [preguntas] = await db.execute(
-                `SELECT id_pregunta, titulo_pregunta as pregunta, respuesta, fecha_creacion 
+                `SELECT 
+                    id_pregunta, 
+                    titulo_pregunta AS pregunta, 
+                    respuesta, 
+                    fecha_creacion 
                  FROM preguntas 
                  WHERE id_usuario = ? 
                  ORDER BY fecha_creacion DESC`,
@@ -144,6 +147,25 @@ class FAQModel {
             return preguntas;
         } catch (error) {
             console.error('❌ [FAQ] Error al obtener preguntas del usuario:', error);
+            throw error;
+        }
+    }
+
+    // ✅ Eliminar pregunta por ID
+    static async eliminarPregunta(idPregunta) {
+        try {
+            const [resultado] = await db.execute(
+                `DELETE FROM preguntas WHERE id_pregunta = ?`,
+                [idPregunta]
+            );
+
+            if (resultado.affectedRows === 0) {
+                return { success: false, message: 'No se encontró la pregunta para eliminar' };
+            }
+
+            return { success: true, message: 'Pregunta eliminada exitosamente' };
+        } catch (error) {
+            console.error('❌ [FAQ] Error al eliminar pregunta:', error);
             throw error;
         }
     }

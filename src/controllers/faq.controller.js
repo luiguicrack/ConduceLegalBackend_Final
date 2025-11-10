@@ -1,14 +1,12 @@
 ﻿import FAQModel from '../services/faq.service.js';
 
 class FAQController {
-    // Obtener todas las preguntas
+    // ✅ Obtener todas las preguntas
     static async getAllPreguntas(req, res) {
         try {
             console.log('🔍 [FAQ] Solicitando todas las preguntas...');
 
-            // Verificar conexión primero
             await FAQModel.verificarConexion();
-
             const preguntas = await FAQModel.getAllPreguntas();
 
             console.log(`✅ [FAQ] Enviadas ${preguntas.length} preguntas`);
@@ -22,18 +20,16 @@ class FAQController {
                     timestamp: new Date().toISOString()
                 }
             });
-
         } catch (error) {
             console.error('❌ [FAQ] Error en getAllPreguntas:', error);
             res.status(500).json({
                 success: false,
-                message: 'Error interno del servidor al obtener las preguntas',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+                message: 'Error interno del servidor al obtener las preguntas'
             });
         }
     }
 
-    // Buscar preguntas por término
+    // ✅ Buscar preguntas por término
     static async buscarPreguntas(req, res) {
         try {
             const { q } = req.query;
@@ -62,18 +58,16 @@ class FAQController {
                     timestamp: new Date().toISOString()
                 }
             });
-
         } catch (error) {
             console.error('❌ [FAQ] Error en buscarPreguntas:', error);
             res.status(500).json({
                 success: false,
-                message: 'Error interno del servidor al buscar preguntas',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+                message: 'Error interno del servidor al buscar preguntas'
             });
         }
     }
 
-    // Obtener pregunta específica por ID
+    // ✅ Obtener pregunta específica por ID
     static async getPreguntaById(req, res) {
         try {
             const { id } = req.params;
@@ -94,7 +88,6 @@ class FAQController {
                 data: pregunta,
                 message: 'Pregunta obtenida exitosamente'
             });
-
         } catch (error) {
             console.error('❌ [FAQ] Error en getPreguntaById:', error);
             res.status(500).json({
@@ -104,7 +97,7 @@ class FAQController {
         }
     }
 
-    // Obtener preguntas recientes
+    // ✅ Obtener preguntas recientes
     static async getPreguntasRecientes(req, res) {
         try {
             console.log('🆕 [FAQ] Solicitando preguntas recientes...');
@@ -122,7 +115,6 @@ class FAQController {
                     timestamp: new Date().toISOString()
                 }
             });
-
         } catch (error) {
             console.error('❌ [FAQ] Error en getPreguntasRecientes:', error);
             res.status(500).json({
@@ -132,12 +124,11 @@ class FAQController {
         }
     }
 
-    // Crear nueva pregunta
+    // ✅ Crear nueva pregunta (id_usuario opcional)
     static async crearPregunta(req, res) {
         try {
-            const { titulo_pregunta, respuesta, id_usuario } = req.body;
+            const { titulo_pregunta, respuesta, id_usuario, id_categoria } = req.body;
 
-            // Validaciones básicas
             if (!titulo_pregunta || !respuesta) {
                 return res.status(400).json({
                     success: false,
@@ -157,7 +148,8 @@ class FAQController {
             const nuevaPregunta = await FAQModel.crearPregunta({
                 titulo_pregunta: titulo_pregunta.trim(),
                 respuesta: respuesta.trim(),
-                id_usuario: id_usuario || 1 // Por defecto usuario 1
+                id_usuario: id_usuario || null, // si no se pasa, se inserta NULL
+                id_categoria: id_categoria || 1
             });
 
             console.log(`✅ [FAQ] Pregunta creada con ID: ${nuevaPregunta.id_pregunta}`);
@@ -167,7 +159,6 @@ class FAQController {
                 data: nuevaPregunta,
                 message: 'Pregunta creada exitosamente'
             });
-
         } catch (error) {
             console.error('❌ [FAQ] Error al crear pregunta:', error);
             res.status(500).json({
@@ -177,11 +168,10 @@ class FAQController {
         }
     }
 
-    // Obtener preguntas del usuario
+    // ✅ Obtener preguntas del usuario
     static async getMisPreguntas(req, res) {
         try {
             const { id_usuario } = req.params;
-        
             console.log(`👤 [FAQ] Solicitando preguntas del usuario: ${id_usuario}`);
 
             const preguntas = await FAQModel.getPreguntasPorUsuario(id_usuario);
@@ -198,12 +188,53 @@ class FAQController {
                     timestamp: new Date().toISOString()
                 }
             });
-
         } catch (error) {
             console.error('❌ [FAQ] Error al obtener preguntas del usuario:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error interno del servidor al obtener las preguntas del usuario'
+            });
+        }
+    }
+
+    // ✅ Eliminar pregunta por ID
+    static async eliminarPregunta(req, res) {
+        try {
+            const { id } = req.params;
+
+            if (!id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El ID de la pregunta es obligatorio'
+                });
+            }
+
+            console.log(`🗑️ [FAQ] Solicitando eliminación de la pregunta ID: ${id}`);
+
+            const resultado = await FAQModel.eliminarPregunta(id);
+
+            if (!resultado.success) {
+                return res.status(404).json({
+                    success: false,
+                    message: resultado.message
+                });
+            }
+
+            console.log(`✅ [FAQ] Pregunta ID ${id} eliminada correctamente`);
+
+            res.json({
+                success: true,
+                message: resultado.message,
+                metadata: {
+                    id_pregunta: parseInt(id),
+                    timestamp: new Date().toISOString()
+                }
+            });
+        } catch (error) {
+            console.error('❌ [FAQ] Error en eliminarPregunta:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al eliminar la pregunta'
             });
         }
     }
