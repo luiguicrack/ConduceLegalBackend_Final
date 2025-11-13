@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=conduce_legal_pass
+      - DB_NAME=conductor_legal
+      - JWT_SECRET=clave_secreta_conduce_legal_docker
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - conduce-legal-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: conduce_legal_pass
+      MYSQL_DATABASE: conductor_legal
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - conduce-legal-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: conduce_legal_pass
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - conduce-legal-network
+
+networks:
+  conduce-legal-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
