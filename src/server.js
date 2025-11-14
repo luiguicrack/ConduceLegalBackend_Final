@@ -40,7 +40,7 @@ const swaggerOptions = {
                 '- [Google Drive - Documentación](https://drive.google.com/drive/folders/15zcsjuSAXnhkae0LupokjyE-MoPDwxOT)\n',
             contact: {
                 name: 'Equipo Conduce Legal',
-                email: 'equipo@conducelegal.com'
+                email: 'conducelegal194@gmail.com'
             }
         },
         servers: [
